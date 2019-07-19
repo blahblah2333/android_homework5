@@ -2,6 +2,7 @@ package com.bytedance.androidcamp.network.demo;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
@@ -87,26 +88,49 @@ public class MainActivity extends AppCompatActivity {
 
     public void testRetrofitSync(View view) throws Exception {
         // TODO 5: Making request in retrofit
-        retrofit = new Retrofit.Builder()
-                .baseUrl(ICatService.HOST)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        Cat cat = null;
-        tvOut.setText(cat.toString());
+//        retrofit = new Retrofit.Builder()
+//                .baseUrl(ICatService.HOST)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//        Cat cat = null;
+//        tvOut.setText(cat.toString());
+        Call<List<Cat>> call = getCatService().randomCat(1);
+        call.enqueue(new Callback<List<Cat>>() {
+            @Override
+            public void onResponse(Call<List<Cat>> call, Response<List<Cat>> response) {
+                if (response.body() != null && response.isSuccessful()) {
+                    Cat cat = response.body().get(0);
+                    tvOut.setText(cat.getUrl());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Cat>> call, Throwable throwable) {
+
+            }
+        });
     }
 
     public void testUpdateUI(View view) {
         // TODO 6: Fix crash of CalledFromWrongThreadException
+        final Handler mHandler = new Handler();
         new Thread() {
             @Override public void run() {
                 final String s = NetworkUtils.getResponseWithHttpURLConnection(ICatService.HOST + ICatService.PATH);
-                tvOut.setText(s);
-                runOnUiThread(new Runnable() {
+                //tvOut.setText(s);
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        tvOut.setText(s);
+//                    }
+//                });
+                Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
                         tvOut.setText(s);
                     }
-                });
+                };
+                mHandler.post(runnable);
             }
         }.start();
     }

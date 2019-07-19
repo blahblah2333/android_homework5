@@ -17,10 +17,9 @@ public interface IMiniDouyinService {
     Call<PostVideoResponse> createVideo(
             @Query("student_id") String student_id,
             @Query("user_name") String user_name,
-            @Part MultipartBody.Part file1,
-            @Part MultipartBody.Part file2
+            @Part MultipartBody.Part image,
+            @Part MultipartBody.Part video
     );
-
 
     @GET("video")
     Call<FeedResponse> randomFeeds();
